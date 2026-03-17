@@ -23,6 +23,18 @@ terraform {
       source  = "hashicorp/vault"
       version = "~> 5.8"
     }
+    random = {
+      source  = "hashicorp/random"
+      version = "~> 3.8"
+    }
+    http = {
+      source  = "hashicorp/http"
+      version = "~> 3.5"
+    }
+    time = {
+      source  = "hashicorp/time"
+      version = "~> 0.13"
+    }
   }
 
   backend "s3" {

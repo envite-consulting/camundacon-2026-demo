@@ -66,6 +66,14 @@ module "stackit_opensearch" {
   depends_on        = [module.stackit_secrets_manager]
 }
 
+module "stackit_modelserving_token" {
+  source            = "../../modules/stackit-modelserving-token"
+  project_id        = var.project_id
+  name              = "camunda-modelserving-${var.environment}"
+  rotation_days     = 80
+  secret_store_path = module.stackit_secrets_manager.instance_id
+}
+
 module "kubernetes_ingress" {
   source                      = "../../modules/kubernetes-ingress"
   cert_manager_cluster_issuer = local.cert_manager_cluster_issuer
