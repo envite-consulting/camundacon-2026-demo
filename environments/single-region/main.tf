@@ -163,6 +163,7 @@ module "camunda_workflow_engine" {
     name     = local.postgres_database_name_webmodeler
     username = module.stackit_postgres_webmodeler.db_username
   }
+  modelserving_token_kv_secret = module.stackit_modelserving_token.credentials_kv_secret
   depends_on = [
     module.kubernetes_identity_management,
     module.kubernetes_messaging,

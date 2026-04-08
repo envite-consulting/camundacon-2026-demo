@@ -150,3 +150,34 @@ resource "kubectl_manifest" "external_secret_keycloak" {
     }
   })
 }
+
+resource "kubectl_manifest" "external_secret_modelserving_token" {
+  yaml_body = yamlencode({
+    apiVersion = "external-secrets.io/v1"
+    kind       = "ExternalSecret"
+    metadata = {
+      name      = "es-${local.modelserving_token_secret}"
+      namespace = kubernetes_namespace_v1.camunda.metadata[0].name
+    }
+    spec = {
+      refreshInterval = "10s"
+      secretStoreRef = {
+        name = var.secret_store_path
+        kind = "ClusterSecretStore"
+      }
+      target = {
+        name           = local.modelserving_token_secret
+        creationPolicy = "Owner"
+      }
+      data = [
+        {
+          secretKey = local.modelserving_token_secret_key
+          remoteRef = {
+            key      = var.modelserving_token_kv_secret
+            property = "token"
+          }
+        }
+      ]
+    }
+  })
+}
