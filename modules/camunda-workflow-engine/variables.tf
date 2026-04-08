@@ -128,3 +128,8 @@ variable "webmodeler_mail_from_address" {
   description = "Email address used as the sender of emails sent by Web Modeler."
   type        = string
 }
+
+variable "modelserving_token_kv_secret" {
+  description = "Key in the ESO ClusterSecretStore that holds the Modelserving token"
+  type        = string
+}

@@ -7,6 +7,8 @@ locals {
   camunda_passwords_secret                  = "camunda-passwords"
   ingress_tls_secret                        = "camunda-tls"
   zeebe_grpc_tls_secret                     = "camunda-zeebe-grpc-tls"
+  modelserving_token_secret                 = "modelserving-token"
+  modelserving_token_secret_key = "STACKIT_AI_Model_Serving_Token"
 
   camunda_values = {
     global = {
@@ -129,6 +131,13 @@ locals {
           }
         }
       }
+      envFrom = [
+        {
+          secretRef = {
+            name = local.modelserving_token_secret
+          }
+        }
+      ]
     }
 
     orchestration = {
