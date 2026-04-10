@@ -6,51 +6,52 @@ This example demonstrates how to deploy and run an AI-driven chat process in Cam
 
 ## Prerequisites
 
-- **Camunda 8.8+** (SaaS or Self-Managed)
-- Access to Camunda Connectors (Agentic AI, HTTP, etc.)
-- Outbound internet access for connectors (to reach APIs)
-- (Optional) Credentials for any external APIs/tools you want to use
+A full Camunda 8 deployment on STACKIT as described in this repository is required, including:
+
+- Camunda 8 (Orchestration Cluster + Web Modeler + Console)
+- `stackit-modelserving-token` module deployed and wired into `camunda-workflow-engine` (provides the STACKIT AI Model Serving token as Vault secret `modelserving-token`)
+
+All of the above are provisioned together via `environments/single-region`.
 
 ---
 
 ## Secrets & Configuration
 
-This example requires AWS Bedrock access. You need to set up the following credentials. Create the following secrets in your Camunda cluster:
+This example uses the **STACKIT AI Model Serving** service for LLM inference. The required API token is managed automatically by the infrastructure:
 
-| Secret Name                  | Purpose                        |
-|------------------------------|--------------------------------|
-| `AWS_BEDROCK_ACCESS_KEY`     | AWS Bedrock access key         |
-| `AWS_BEDROCK_SECRET_KEY`     | AWS Bedrock secret key         |
-| ...                          | ...                            |
+- The `stackit-modelserving-token` module generates and rotates the token and exports it as a Vault secret.
+- The `camunda-workflow-engine` module creates a Kubernetes secret (`modelserving-token`) from it via External Secrets Operator.
+- The secret is mounted into the Camunda Connectors pod via Helm configuration, making it available as a connector secret (`STACKIT_AI_Model_Serving_Token`).
 
-Configure the connectors in the Web Modeler or via environment variables as needed.
+For details on how connector secrets work in Camunda Self-Managed, see the [Camunda Connectors Configuration Docs](https://docs.camunda.io/docs/self-managed/components/connectors/connectors-configuration/#secrets).
+
+The AI model endpoint and model configuration are already set in the process model. No manual secret setup is needed.
 
 ---
 
 ## How to Deploy & Run
 
-1. **Import the BPMN Model**
-	- Open Camunda Web Modeler.
-	- Import `ai-agent-chat-with-tools.bpmn` and all the form files from this folder.
+1. **Import all files into the Web Modeler**
+    - Open Camunda Web Modeler.
+    - Import **all files** from the `ai-agent-chat-with-tools/` folder
 
-2. **Configure Connectors**
-	- Configure any HTTP connectors or other tools you want the agent to use.
-    - Feel free to add your own tools by creating new activities in the `AI Agent` ad-hoc sub-process.
+2. **Publish the Element Templates**
+    - In the Web Modeler, publish the following element templates for the project:
+        - `AI Agent Sub-process`
+        - `AI Agent Task`
+        - `REST Outbound Connector`
 
-3. **Set Secrets**
-	- In Camunda Console, add any required secrets (see above).
-    - If you use c8run, set the secrets as environment variables and restart `c8run`
-    - If you use c8run with Docker, add the secrets in the `connector-secrets.txt` file and restart `c8run`
+   **Important: Depending on the version number specified when publishing, the connector templates in the process model may need to be re-selected manually after publishing a new version.**
 
-4. **Deploy the Process**
-	- Deploy the process to your Camunda 8 cluster.
+3. **Deploy the Process**
+    - Deploy the process to your Camunda 8 cluster.
 
-5. **Start a New Instance**
-	- Use the Web Modeler to start an instance by filling out the form to start an instance.
-	- Use tasklist to fill out the form to start a new instance.
+4. **Start a New Instance**
+    - Use the Web Modeler to start an instance by filling out the form.
+    - Alternatively, use Tasklist to fill out the form and start a new instance.
 
-6. **Interact**
-	- The agent will respond, possibly using tools.
+5. **Interact**
+    - The agent will respond, possibly using tools.
 
 ---
 
@@ -89,7 +90,5 @@ Example inputs which can be entered in the initial form:
 
 - `Send Ervin a joke`: this will need to do multiple tool calling steps to find a user named "Ervin", to fetch a joke
   and to compose an e-mail for the "Ask human to send email" task. The email sending user can provide feedback to update
-  the message such as "include emojis" or "include a spanish translation". 
+  the message such as "include emojis" or "include a spanish translation".
 - `Tell me about this document` can be used to analyze a PDF document with the file upload picker provided in the initial form.
-
-_Made with ❤️ by Camunda_
